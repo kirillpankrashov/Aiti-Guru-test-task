@@ -1,0 +1,25 @@
+
+
+.loader {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 3em;
+	height: 100%;
+	width: 100%;
+}
+
+.spinner {
+	width: 4em;
+	height: 4em;
+	border: 0.3em solid var(--border-color);
+	border-top-color: var(--color-primary);
+	border-radius: 50%;
+	animation: loader-spin 0.8s linear infinite;
+}
+
+@keyframes loader-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}

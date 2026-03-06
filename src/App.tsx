@@ -1,35 +1,61 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Navigate, Route, Routes } from 'react-router-dom';
+import './App.css';
+import { HomePage } from './pages/HomePage/HomePage.tsx';
+import { ProductsPage } from './pages/ProductsPage/ProductsPage.tsx';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
+import { useAuthStore } from './store/useAuthStore';
 
-function App() {
-  const [count, setCount] = useState(0)
+const ProtectedRoute = ({ children }: { children: React.ReactElement }) => {
+	const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+	if (!isAuthenticated) {
+		return <Navigate to="/" replace />;
+	}
 
-export default App
+	return children;
+};
+
+const PublicOnlyRoute = ({ children }: { children: React.ReactElement }) => {
+	const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+	if (isAuthenticated) {
+		return <Navigate to="/products" replace />;
+	}
+
+	return children;
+};
+
+const queryClient = new QueryClient();
+
+const App = () => {
+	return (
+		<QueryClientProvider client={queryClient}>
+			<div className="app">
+				<Toaster position="top-right" />
+				<main className="app-main">
+					<Routes>
+						<Route
+							path="/"
+							element={
+								<PublicOnlyRoute>
+									<HomePage />
+								</PublicOnlyRoute>
+							}
+						/>
+						<Route
+							path="/products"
+							element={
+								<ProtectedRoute>
+									<ProductsPage />
+								</ProtectedRoute>
+							}
+						/>
+					</Routes>
+				</main>
+			</div>
+		</QueryClientProvider>
+	);
+};
+
+export { App };
